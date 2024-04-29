@@ -1,5 +1,4 @@
-from fastapi import FastAPI, APIRouter, Query
-
+from fastapi import FastAPI, APIRouter, Query, HTTPException
 from typing import Optional
 
 from app.schemas import RecipeSearchResults, Recipe, RecipeCreate
@@ -28,8 +27,15 @@ def fetch_recipe(*, recipe_id: int) -> dict:
     """
 
     result = [recipe for recipe in RECIPES if recipe["id"] == recipe_id]
-    if result:
-        return result[0]
+    if not result:
+        # the exception is raised, not returned - you will get a validation
+        # error otherwise.
+        # 2
+        raise HTTPException(
+            status_code=404, detail=f"Recipe with ID {recipe_id} not found"
+        )
+
+    return result[0]
 
 
 # Updated using the FastAPI parameter validation `Query` class
